@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -euo pipefail
 
@@ -48,12 +48,11 @@ install_zlib() {
   rm -rf "zlib-${ZLIB_VERSION}"
 }
 
-build_java_static() {
-  javac EnvMap.java
-  native-image --static --libc=musl EnvMap
-}
 
-main() {
+
+build() {
+  local type="$1"
+
   clean
   PATH="$MUSL_HOME/bin:$PATH"
   (
@@ -62,7 +61,42 @@ main() {
     install_musl
     install_zlib
   )
-  build_java_static
+
+  if [ "$type" == "simple" ]; then
+    javac java-simple/EnvMap.java
+    native-image --static --libc=musl java-simple/EnvMap
+  elif [ "$type" == "gradle" ]; then
+    (
+      cd java-gradle
+      ./gradlew nativeCompile
+    )
+  else
+    (
+      cd java-simple
+      javac EnvMap.java
+      native-image --static --libc=musl EnvMap
+    )
+  fi
 }
 
-main
+usage() {
+  echo "Usage: $0 [simple|gradle]"
+  exit 1
+}
+
+if [ "$#" -ne 1 ]; then
+  usage
+fi
+
+case "$1" in
+  simple)
+    build "simple"
+    ;;
+  gradle)
+    build "gradle"
+    ;;
+  *)
+    echo "Invalid option: $1"
+    usage
+    ;;
+esac

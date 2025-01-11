@@ -1,0 +1,61 @@
+= Experiments for static native compilation
+
+The repo contains 3 examples:
+
+* C build with make and gnu and musl compilers.
+* Simple Java build with `javac`, `native-image` and musl.
+* Gradle Java build with Graal plugin and musl.
+
+[IMPORTANT]
+====
+`build-java.sh` creates path `cc_env` directory with a local setup of MUSL compile with ZLIB library used for compilation.
+To run step-by-step, once the directory is set, set up your environment as follows:
+
+ MUSL_HOME="$PWD/cc_env/musl-toolchain/"
+ PATH="$MUSL_HOME/bin:$PATH"
+====
+
+== Requirements
+
+* GNU/Linux (x86_64 arch)
+* GraalVM v21 or higher
+
+== Building C
+
+ cd c && make all
+
+== Building Simple Java
+
+ ./build-java.sh simple
+
+To validate, run
+
+ objdump -T java-simple/envmap
+
+The output should be
+
+----
+java-simple/envmap:     file format elf64-x86-64
+
+objdump: java-simple/envmap: not a dynamic object
+DYNAMIC SYMBOL TABLE:
+no symbols
+----
+
+== Building Gradle Java
+
+ ./build-java.sh gradle
+
+To validate, run
+
+ objdump -T java-gradle/build/native/nativeCompile/java-gradle
+
+The output should be
+
+----
+java-simple/envmap:     file format elf64-x86-64
+
+objdump: java-gradle/build/native/nativeCompile/java-gradle: not a dynamic object
+DYNAMIC SYMBOL TABLE:
+no symbols
+----

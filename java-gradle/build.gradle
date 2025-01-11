@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+    id 'org.graalvm.buildtools.native' version '0.10.3'
+}
+
+graalvmNative {
+    binaries {
+        main {
+            mainClass = 'org.example.EnvMap'
+            buildArgs.addAll("--static", "--libc=musl")
+        }
+    }
+}
